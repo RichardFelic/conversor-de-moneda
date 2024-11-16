@@ -4,6 +4,8 @@ import { ChevronDown, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ExchangeRateCard } from './ExchangeRateCard';
 import type { ExchangeRate } from '@/types/api';
+import { useTranslation } from 'react-i18next';
+
 
 interface ExchangeRatesGridProps {
   rates: ExchangeRate[];
@@ -13,6 +15,8 @@ export function ExchangeRatesGrid({ rates }: ExchangeRatesGridProps) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { t } = useTranslation();
+
   
   const filteredRates: ExchangeRate[] = rates.filter(rate => {
     return (rate.currencyFrom as string)?.includes(searchQuery.toUpperCase()) ||
@@ -38,7 +42,7 @@ export function ExchangeRatesGrid({ rates }: ExchangeRatesGridProps) {
               className="w-full h-12"
               endContent={<ChevronDown />}
             >
-              Select a currency
+            {t('available_rates.currency_selector.label')}
             </Button>
           </DropdownTrigger>
           <DropdownMenu 
@@ -48,7 +52,7 @@ export function ExchangeRatesGrid({ rates }: ExchangeRatesGridProps) {
           >
             <DropdownItem key="search" className="h-12 gap-2" isReadOnly>
               <Input
-                placeholder="Search"
+                placeholder={t('available_rates.currency_selector.search_label')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 startContent={<Search size={18} className="text-default-400" />}

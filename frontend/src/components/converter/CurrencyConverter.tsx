@@ -1,57 +1,64 @@
-import { useState, useEffect } from "react";
-import { Card, CardBody, Spinner } from "@nextui-org/react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/axios";
-import { useAuthStore } from "@/stores/authStore";
-import { useDebounce } from "@/hooks/useDebounce";
-import { useConversion } from "./hooks/useConversion";
-import type {
-  ExchangeRate,
-  Institution,
-  InstitutionExchangeRate,
-} from "./types";
-import { InstitutionSelect } from "./ConversionConverterComponents/InstitutionSelect";
-import { ConversionControls } from "./ConversionConverterComponents/ConversionControls";
-import { ConversionResult } from "./ConversionConverterComponents/ConversionResult";
+import { useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardBody, Spinner } from '@nextui-org/react';
+import { useConversionStore } from './stores/conversionStore';
+import { useConversion } from './hooks/useConversion';
+import { api } from '@/lib/axios';
+import { ConversionControls } from './ConversionControls';
+import { ConversionResult } from './ConversionResult';
+import { InstitutionSelect } from './InstitutionSelect';
+import type { ExchangeRate, Institution, InstitutionExchangeRate } from './types';
+import './ConversionControl.css';
+import { useAuthStore } from "../../stores/authStore";
 
 export function CurrencyConverter() {
-  const [amount, setAmount] = useState<string>("");
-  const [currencyFrom, setCurrencyFrom] = useState<string>("");
-  const [currencyTo, setCurrencyTo] = useState<string>("");
-  const [selectedInstitution, setSelectedInstitution] = useState<string>("");
-  const [result, setResult] = useState<number | null>(null);
-  const [baseRate, setBaseRate] = useState<number | null>(null);
+  // useConversionStore para manejar el estado de la conversion
+  const {
+    amount,
+    currencyFrom,
+    currencyTo,
+    selectedInstitution,
+    setResult,
+    setBaseRate,
+    setCurrencyFrom,
+    setCurrencyTo,
+  } = useConversionStore();
 
+  // useAuthStore para verificar si el usuario esta autenticado
   const { isAuthenticated } = useAuthStore();
+<<<<<<< HEAD
   const debouncedAmount = useDebounce(amount, 200);
+=======
+>>>>>>> fa08bdd6a66a266e4ca04b129afe4f0dcb602baa
 
+  // Consulta a la api para obtener las tasas de cambio generales
   const { data: generalRates = [], isLoading: isLoadingGeneral } = useQuery({
-    queryKey: ["exchange-rates"],
+    queryKey: ['exchange-rates'],
     queryFn: async () => {
-      const response = await api.get("/exchange-rates");
-      return response.data as ExchangeRate[];
-    },
-  });
-
-  const { data: institutionalRates = [], isLoading: isLoadingInstitutional } =
-    useQuery({
-      queryKey: ["institution-exchange-rates"],
-      queryFn: async () => {
-        const response = await api.get("/institutions-exchange-rates");
-        return response.data as InstitutionExchangeRate[];
-      },
-      enabled: isAuthenticated,
-    });
-
-  const { data: institutions = [] } = useQuery({
-    queryKey: ["institutions"],
-    queryFn: async () => {
-      const response = await api.get("/institutions");
+      const response = await api.get<ExchangeRate[]>('/exchange-rates');
       return response.data;
     },
-    enabled: isAuthenticated,
   });
 
+  // Consulta a la api para obtener las instituciones
+  const { data: institutions = [], isLoading: isLoadingInstitutions } = useQuery({
+    queryKey: ['institutions'],
+    queryFn: async () => {
+      const response = await api.get<Institution[]>('/institutions');
+      return response.data;
+    },
+  });
+
+  // Consulta a la api para obtener las tasas de cambio institucionales
+  const { data: institutionalRates = [], isLoading: isLoadingInstitutional } = useQuery({
+    queryKey: ['institution-exchange-rates'],
+    queryFn: async () => {
+      const response = await api.get<InstitutionExchangeRate[]>('/institutions-exchange-rates');
+      return response.data;
+    },
+  });
+
+  // useMutation para hacer la conversion
   const convertMutation = useConversion((data) => {
     setResult(data.result);
     if (data.amount > 0) {
@@ -59,35 +66,31 @@ export function CurrencyConverter() {
     }
   });
 
+  // useMemo para obtener las tasas de cambio actuales
+  const currentRates = useMemo(() => 
+    selectedInstitution 
+      ? institutionalRates.filter(rate => rate.institution._id === selectedInstitution)
+      : generalRates,
+    [selectedInstitution, institutionalRates, generalRates]
+  );
+
+  // useMemo para obtener la tasa de cambio actual
+  const currentRate = useMemo(() => 
+    currentRates.find(
+      rate => rate.currencyFrom === currencyFrom && rate.currencyTo === currencyTo
+    ),
+    [currentRates, currencyFrom, currencyTo]
+  );
+
+  // useEffect para inicializar las monedas
   useEffect(() => {
-    if (selectedInstitution) {
-      const institutionRates = institutionalRates.filter(
-        (rate) => rate.institution._id === selectedInstitution
-      );
+    if (currentRates.length === 0) return;
 
-      if (institutionRates.length > 0) {
-        const firstRate = institutionRates[0];
-        setCurrencyFrom(firstRate.currencyFrom);
-
-        const availableTo = institutionRates
-          .filter((rate) => rate.currencyFrom === firstRate.currencyFrom)
-          .map((rate) => rate.currencyTo);
-
-        if (availableTo.length > 0) {
-          setCurrencyTo(availableTo[0]);
-        }
-      }
-    } else {
-      if (generalRates.length > 0) {
-        setCurrencyFrom(generalRates[0].currencyFrom);
-        const availableTo = generalRates
-          .filter((rate) => rate.currencyFrom === generalRates[0].currencyFrom)
-          .map((rate) => rate.currencyTo);
-        if (availableTo.length > 0) {
-          setCurrencyTo(availableTo[0]);
-        }
-      }
+    const firstRate = currentRates[0];
+    if (!currencyFrom) {
+      setCurrencyFrom(firstRate.currencyFrom);
     }
+<<<<<<< HEAD
     setResult(null);
     setBaseRate(null);
   }, [selectedInstitution, institutionalRates, generalRates]);
@@ -106,40 +109,64 @@ export function CurrencyConverter() {
   const handleConvert = () => {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       setResult(0);
+=======
+
+    const availableTo = currentRates
+      .filter(rate => rate.currencyFrom === (currencyFrom || firstRate.currencyFrom))
+      .map(rate => rate.currencyTo);
+
+    if (availableTo.length > 0 && !currencyTo) {
+      setCurrencyTo(availableTo[0]);
+    }
+  }, [currentRates, selectedInstitution]);
+
+  // useEffect para hacer la conversion
+  useEffect(() => {
+    if (!amount || !currencyFrom || !currencyTo || !currentRate) {
+      setResult(null);
+>>>>>>> fa08bdd6a66a266e4ca04b129afe4f0dcb602baa
       setBaseRate(null);
       return;
     }
 
+<<<<<<< HEAD
     if (!currencyFrom || !currencyTo) {
       setResult(0);
+=======
+    const numAmount = Number(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      setResult(null);
+>>>>>>> fa08bdd6a66a266e4ca04b129afe4f0dcb602baa
       setBaseRate(null);
       return;
     }
 
-    const conversionData = {
-      amount: Number(amount),
-      currencyFrom,
-      currencyTo,
-      ...(selectedInstitution && {
-        institution_exchange_rate_id: institutionalRates.find(
-          (rate) =>
-            rate.institution._id === selectedInstitution &&
-            rate.currencyFrom === currencyFrom &&
-            rate.currencyTo === currencyTo
-        )?._id,
-      }),
-    };
+    const timer = setTimeout(() => {
+      const conversionData = {
+        amount: numAmount,
+        currencyFrom,
+        currencyTo,
+        ...(selectedInstitution && currentRate && {
+          institution_exchange_rate_id: currentRate._id,
+        }),
+      };
 
-    convertMutation.mutate(conversionData);
-  };
+      convertMutation.mutate(conversionData);
+    }, 500);
 
+<<<<<<< HEAD
   const handleReset = () => {
     setAmount("");
     setResult(0);
     setBaseRate(null);
   };
+=======
+    return () => clearTimeout(timer);
+  }, [amount, currencyFrom, currencyTo, currentRate, selectedInstitution]);
+>>>>>>> fa08bdd6a66a266e4ca04b129afe4f0dcb602baa
 
-  if (isLoadingGeneral || (isAuthenticated && isLoadingInstitutional)) {
+  // Si esta cargando, muestra un spinner
+  if (isLoadingGeneral || isLoadingInstitutions || isLoadingInstitutional) {
     return (
       <div className="flex justify-center items-center h-64">
         <Spinner size="lg" />
@@ -148,41 +175,26 @@ export function CurrencyConverter() {
   }
 
   return (
-    <Card className="w-full max-w-3xl mx-auto p-8">
-      <CardBody className="gap-6 p-4 sm:p-6">
-        <div className="flex flex-col gap-6">
-          {isAuthenticated && (
-            <div className="institute-selector-container">
+    <div className="w-full px-4 py-6">
+      <Card className="w-full max-w-3xl card-min-w mx-auto p-8">
+        <CardBody className="gap-6 p-4 sm:p-6">
+          <div className="flex flex-col gap-6">
+            {institutions.length > 0 && !!isAuthenticated &&(
               <InstitutionSelect
-                label="Institution (Optional)"
-                institutions={institutions as Institution[]}
+                institutions={institutions}
                 selectedInstitution={selectedInstitution}
-                onSelect={setSelectedInstitution}
-                />
-            </div>
-              )}
+              />
+            )}
 
-          <ConversionControls
-            amount={amount}
-            currencyFrom={currencyFrom}
-            currencyTo={currencyTo}
-            result={result}
-            generalRates={generalRates}
-            institutionalRates={institutionalRates}
-            selectedInstitution={selectedInstitution}
-            onAmountChange={setAmount}
-            onCurrencyFromChange={setCurrencyFrom}
-            onCurrencyToChange={setCurrencyTo}
-          />
+            <ConversionControls
+              generalRates={generalRates}
+              institutionalRates={institutionalRates}
+            />
 
-          <ConversionResult
-            baseRate={baseRate}
-            currencyFrom={currencyFrom}
-            currencyTo={currencyTo}
-            onReset={handleReset}
-          />
-        </div>
-      </CardBody>
-    </Card>
+            <ConversionResult />
+          </div>
+        </CardBody>
+      </Card>
+    </div>
   );
 }

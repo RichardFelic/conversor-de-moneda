@@ -1,0 +1,121 @@
+.card-min-w {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    overflow: visible;
+  }
+  
+  @media (min-width: 640px) {
+    .card-min-w {
+      min-width: 380px;
+      max-width: 48rem;
+    }
+  }
+  
+  .institute-selector-container {
+    padding: 8px 12px 12px 12px;
+    border: 1px solid #C6C6C6;
+    width: 100%;
+    border-radius: 4px;
+    background: white;
+  }
+  
+  .institute-selector {
+    display: flex;
+    justify-content: space-between;    
+    align-items: center;
+    width: 100%;
+    gap: 16px;
+  }
+  
+  .selector-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .institution-select {    
+    width: 100%;
+    font-size: 20px;
+    font-weight: 600;
+    border: none;
+    background: none;
+    color: #1A1A1A;
+    outline: none;
+    padding: 4px 0;
+  }
+  
+  .institution-logo {
+    height: 52px;
+    width: 52px;
+    object-fit: contain;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  
+  .institute-selector label {
+    color: #1A1A1A;
+    display: block;
+    font-weight: 400;
+    margin-bottom: 4px;
+    text-align: start;
+    font-size: 14px;
+  }
+  
+  .currency-input {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: stretch;
+    border: 1px solid #C6C6C6;
+    width: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 90px;
+  }
+  
+  .amount-input {
+    padding: 8px 12px 12px 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .amount-input label {
+    color: #1A1A1A;
+    display: block;
+    font-weight: 400;
+    margin-bottom: 4px;
+    text-align: start;
+  }
+  
+  .amount-input input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1A1A1A;
+    background: transparent;
+    height: 100%;
+  }
+  
+  .divider {
+    width: 3px;
+    background-color: #C6C6C6;
+    height: 100%;
+  }
+  
+  .currency-selector {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .currency-selector select {
+    font-size: 20px;
+    font-weight: 700;
+    border: none;
+    background: none;
+    color: #1A1A1A;
+    outline: none;
+    width: auto;
+    height: 100%;
+  }

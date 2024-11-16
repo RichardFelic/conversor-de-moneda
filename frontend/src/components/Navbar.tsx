@@ -102,7 +102,7 @@ export default function Navbar() {
               className="text-foreground hover:text-primary-600 dark:hover:text-primary-400"
               endContent={<ChevronDown size={16} />}
             >
-              Menu
+            {t('menu.label')}
             </Button>
           </DropdownTrigger>
           <DropdownMenu>
@@ -122,7 +122,7 @@ export default function Navbar() {
               className="text-black"
               to="/exchange-rates"
             >
-              Our Rates
+            {t('menu.our_rates')}
             </DropdownItem>
             <DropdownItem
               key="exchange-rates"
@@ -131,8 +131,9 @@ export default function Navbar() {
               as={RouterLink}
               to="/exchange-rates/history"
             >
-              Rate History
+            {t('menu.rate_history')}
             </DropdownItem>
+           
             <DropdownItem
               key="conversions-history"
               startContent={<History size={18} />}
@@ -140,7 +141,7 @@ export default function Navbar() {
               as={RouterLink}
               to="/conversions/history"
             >
-              Conversion History
+              {t('menu.conversion_history')}
             </DropdownItem>
             {/* {isAuthenticated && (
               <>
@@ -230,7 +231,8 @@ export default function Navbar() {
                 className="text-black"
                 to="/institutions"
               >
-                Institutions
+              {t('admin_menu.institutions')}
+
               </DropdownItem>
               <DropdownItem
                 key="users"
@@ -239,7 +241,8 @@ export default function Navbar() {
                 className="text-black"
                 to="/users"
               >
-                Users
+                {t('admin_menu.users')}
+
               </DropdownItem>
               <DropdownItem
                 key="exchange-rates"
@@ -248,7 +251,7 @@ export default function Navbar() {
                 className="text-black"
                 to="/admin/exchange-rates"
               >
-                Exchange Rates
+                {t('admin_menu.exchange_rates')}
               </DropdownItem>
               <DropdownItem
                 key="institution-rates"
@@ -257,7 +260,7 @@ export default function Navbar() {
                 className="text-black"
                 to="/exchange-rates/institutions"
               >
-                Institution Rates
+                {t('admin_menu.institution_rates')}
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>

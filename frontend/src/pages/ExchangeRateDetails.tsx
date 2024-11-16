@@ -9,9 +9,13 @@ import { DollarSign } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { exchangeRateApi } from '@/services/api/exchangeRates';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+
 
 export default function ExchangeRateDetails() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
+
 
   const { data: rate, isLoading, error } = useQuery({
     queryKey: ['exchange-rate', id],
@@ -66,20 +70,19 @@ export default function ExchangeRateDetails() {
               <DollarSign className="text-primary-500" size={24} />
             </div>
             <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-              Exchange Rate Details
-            </h1>
+              {t('exchange_rate_details.title')}</h1>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">From Currency</h2>
+                <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('exchange_rate_details.from')}</h2>
                 <Chip size="lg" variant="flat" color="primary" className="mt-1">
                   {rate.currencyFrom}
                 </Chip>
               </div>
               <div>
-                <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">To Currency</h2>
+                <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('exchange_rate_details.to')}</h2>
                 <Chip size="lg" variant="flat" color="secondary" className="mt-1">
                   {rate.currencyTo}
                 </Chip>
@@ -88,13 +91,13 @@ export default function ExchangeRateDetails() {
 
             <div className="space-y-4">
               <div>
-                <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">Exchange Rate</h2>
+                <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('exchange_rate_details.exchange_rate')}</h2>
                 <p className="text-2xl font-semibold text-primary-600 dark:text-primary-400 mt-1">
                   {rate.exchangeRate.toFixed(4)}
                 </p>
               </div>
               <div>
-                <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Updated</h2>
+                <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('exchange_rate_details.last_updated')}</h2>
                 <p className="text-gray-700 dark:text-gray-300 mt-1">
                   {formatDate(rate.updatedAt?.toString() ?? '')}
                 </p>
