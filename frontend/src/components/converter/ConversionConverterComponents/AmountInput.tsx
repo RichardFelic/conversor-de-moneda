@@ -1,7 +1,7 @@
 // import { Input } from "@nextui-org/react";
 
 
-interface AmountInputProps {
+type AmountInputProps = {
   type: string;
   label: string;
   value: string | undefined;
@@ -11,10 +11,11 @@ interface AmountInputProps {
 }
 
 export function AmountInput({ type, label, value, onChange, readOnly }: AmountInputProps) {
+  //console.table({type, label, value, onChange, readOnly});
   return (
     <div className="amount-input text-sm">
       <label>{label}</label>
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} min={0} readOnly={readOnly}/>
+      <input type={type} value={value||""} onChange={(e) => onChange(e.target.value)} min={0} readOnly={readOnly}/>
     </div>
     // <Input
     //   type="number"

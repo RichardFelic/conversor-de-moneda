@@ -65,6 +65,8 @@ export function ConversionControls({
     onCurrencyToChange(currencyFrom);
   };
 
+  console.log(result, "mundo")
+
   return (
     <div className="flex flex-col md:flex-row items-center gap-4">
       <div className="w-full md:w-[45%] space-y-2">
@@ -102,7 +104,7 @@ export function ConversionControls({
                 <span className="text-default-400">Result</span>
               )}
             </div> */}
-            <AmountInput type="text" label="Converted to" value={result?.toFixed(2)} onChange={onAmountChange} readOnly={true} />
+            <AmountInput type="text" label="Converted to" value={ (result ?? 0).toFixed(2) } onChange={onAmountChange} readOnly={true} />
             <div className="divider"></div>
             <CurrencySelector
               value={currencyTo}

@@ -23,7 +23,7 @@ export function CurrencyConverter() {
   const [baseRate, setBaseRate] = useState<number | null>(null);
 
   const { isAuthenticated } = useAuthStore();
-  const debouncedAmount = useDebounce(amount, 500);
+  const debouncedAmount = useDebounce(amount, 200);
 
   const { data: generalRates = [], isLoading: isLoadingGeneral } = useQuery({
     queryKey: ["exchange-rates"],
@@ -91,25 +91,27 @@ export function CurrencyConverter() {
     setResult(null);
     setBaseRate(null);
   }, [selectedInstitution, institutionalRates, generalRates]);
-
+  
+  
   useEffect(() => {
     if (debouncedAmount && currencyFrom && currencyTo) {
       handleConvert();
     } else {
-      setResult(null);
+      setResult(0);
+      console.log(result, "midu")
       setBaseRate(null);
     }
-  }, [debouncedAmount, currencyFrom, currencyTo, selectedInstitution]);
+  }, [debouncedAmount, currencyFrom, currencyTo, selectedInstitution]); 
 
   const handleConvert = () => {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      setResult(null);
+      setResult(0);
       setBaseRate(null);
       return;
     }
 
     if (!currencyFrom || !currencyTo) {
-      setResult(null);
+      setResult(0);
       setBaseRate(null);
       return;
     }
@@ -133,10 +135,7 @@ export function CurrencyConverter() {
 
   const handleReset = () => {
     setAmount("");
-    setCurrencyFrom("");
-    setCurrencyTo("");
-    setSelectedInstitution("");
-    setResult(null);
+    setResult(0);
     setBaseRate(null);
   };
 

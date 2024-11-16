@@ -1,4 +1,4 @@
-import { Select, SelectItem } from "@nextui-org/react";
+
 
 interface CurrencySelectorProps {
   value: string;
@@ -17,7 +17,7 @@ export function CurrencySelector({
 
   return (
     <div className="currency-selector">
-      <select value={value || ""} onChange={(event) => onChange(event.target.value)}>
+      <select value={value || ""} onChange={(event) => onChange(event.target.value)} disabled={isDisabled}>
         {currencies.map((currency) => (
           <option key={currency} value={currency}>
             {currency}
