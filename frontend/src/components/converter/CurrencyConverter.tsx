@@ -26,6 +26,10 @@ export function CurrencyConverter() {
 
   // useAuthStore para verificar si el usuario esta autenticado
   const { isAuthenticated } = useAuthStore();
+<<<<<<< HEAD
+  const debouncedAmount = useDebounce(amount, 200);
+=======
+>>>>>>> fa08bdd6a66a266e4ca04b129afe4f0dcb602baa
 
   // Consulta a la api para obtener las tasas de cambio generales
   const { data: generalRates = [], isLoading: isLoadingGeneral } = useQuery({
@@ -86,6 +90,26 @@ export function CurrencyConverter() {
     if (!currencyFrom) {
       setCurrencyFrom(firstRate.currencyFrom);
     }
+<<<<<<< HEAD
+    setResult(null);
+    setBaseRate(null);
+  }, [selectedInstitution, institutionalRates, generalRates]);
+  
+  
+  useEffect(() => {
+    if (debouncedAmount && currencyFrom && currencyTo) {
+      handleConvert();
+    } else {
+      setResult(0);
+      console.log(result, "midu")
+      setBaseRate(null);
+    }
+  }, [debouncedAmount, currencyFrom, currencyTo, selectedInstitution]); 
+
+  const handleConvert = () => {
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      setResult(0);
+=======
 
     const availableTo = currentRates
       .filter(rate => rate.currencyFrom === (currencyFrom || firstRate.currencyFrom))
@@ -100,13 +124,19 @@ export function CurrencyConverter() {
   useEffect(() => {
     if (!amount || !currencyFrom || !currencyTo || !currentRate) {
       setResult(null);
+>>>>>>> fa08bdd6a66a266e4ca04b129afe4f0dcb602baa
       setBaseRate(null);
       return;
     }
 
+<<<<<<< HEAD
+    if (!currencyFrom || !currencyTo) {
+      setResult(0);
+=======
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
       setResult(null);
+>>>>>>> fa08bdd6a66a266e4ca04b129afe4f0dcb602baa
       setBaseRate(null);
       return;
     }
@@ -124,8 +154,16 @@ export function CurrencyConverter() {
       convertMutation.mutate(conversionData);
     }, 500);
 
+<<<<<<< HEAD
+  const handleReset = () => {
+    setAmount("");
+    setResult(0);
+    setBaseRate(null);
+  };
+=======
     return () => clearTimeout(timer);
   }, [amount, currencyFrom, currencyTo, currentRate, selectedInstitution]);
+>>>>>>> fa08bdd6a66a266e4ca04b129afe4f0dcb602baa
 
   // Si esta cargando, muestra un spinner
   if (isLoadingGeneral || isLoadingInstitutions || isLoadingInstitutional) {
