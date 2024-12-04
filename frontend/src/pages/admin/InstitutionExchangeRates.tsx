@@ -15,12 +15,14 @@ import ExchangeRateModal from '@/components/admin/ExchangeRateModal';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 
 export default function InstitutionExchangeRates() {
   const [selectedRate, setSelectedRate] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const { data: rates = [], isLoading, error, refetch } = useQuery({
     queryKey: ['institution-exchange-rates'],
@@ -99,10 +101,10 @@ export default function InstitutionExchangeRates() {
               <DollarSign className="text-primary-500" size={24} />
             </div>
             <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-              Exchange Rates
+              {t('admin.exchange_rates.management')}
             </h1>
           </div>
-          <Tooltip content="Add new exchange rate">
+          <Tooltip content={t('admin.exchange_rates.add')}>
             <Button
               color="success"
               startContent={<Plus size={20} />}
@@ -110,7 +112,7 @@ export default function InstitutionExchangeRates() {
               size="lg"
               className="bg-success-500 hover:bg-success-600 text-white font-medium px-6 h-12"
             >
-              Add Exchange Rate
+              {t('admin.exchange_rates.add')}
             </Button>
           </Tooltip>
         </CardBody>
@@ -123,10 +125,10 @@ export default function InstitutionExchangeRates() {
               <DollarSign className="text-success-500" size={32} />
             </div>
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-              No Exchange Rates Yet
+              {t('admin.exchange_rates.noRates')}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-              Get started by adding your first exchange rate.
+              {t('admin.exchange_rates.messages.createFirst')}
             </p>
             <Button
               color="success"
@@ -135,7 +137,7 @@ export default function InstitutionExchangeRates() {
               size="lg"
               className="mt-4 bg-success-500 hover:bg-success-600 text-white font-medium px-8"
             >
-              Add First Exchange Rate
+              {t('admin.exchange_rates.addFirst')}
             </Button>
           </CardBody>
         </Card>

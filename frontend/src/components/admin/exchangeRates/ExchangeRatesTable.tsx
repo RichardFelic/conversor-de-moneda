@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   Table, 
   TableHeader, 
@@ -7,60 +8,67 @@ import {
   TableCell,
   Button,
   Tooltip,
-  Chip,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
   Card,
-  CardBody
+  CardBody,
+  Chip
 } from '@nextui-org/react';
 import { Pencil, Trash2, AlertTriangle, Copy } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { exchangeRateApi } from '@/services/api/exchangeRates';
-import type { ExchangeRate } from '@/types/api';
+import { institutionExchangeRateApi } from '@/services/api/institutionExchangeRates';
+import type { InstitutionExchangeRate } from '@/services/api/institutionExchangeRates';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
-import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ExchangeRatesTableProps {
-  rates: ExchangeRate[];
-  onEdit: (rate: ExchangeRate) => void;
+  rates: InstitutionExchangeRate[];
+  onEdit: (rate: InstitutionExchangeRate) => void;
+}
+
+// Add type for error response
+interface ErrorResponse {
+  message?: string;
+  response?: {
+    status?: number;
+  };
 }
 
 export default function ExchangeRatesTable({ rates, onEdit }: ExchangeRatesTableProps) {
-  const [deleteModal, setDeleteModal] = useState<{
-    isOpen: boolean;
-    rate: ExchangeRate | null;
-  }>({
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; rate: InstitutionExchangeRate | null }>({
     isOpen: false,
     rate: null
   });
-
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const deleteMutation = useMutation({
-    mutationFn: exchangeRateApi.delete,
+    mutationFn: async (id: string) => {
+      const response = await institutionExchangeRateApi.delete(id);
+      return response;
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-exchange-rates'] });
-      toast.success('Exchange rate deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['institution-exchange-rates'] });
+      toast.success(t('common.success'));
       handleCloseDeleteModal();
     },
-    onError: (error: any) => {
+    onError: (error: ErrorResponse) => {
       if (error.response?.status === 401) {
         logout();
         navigate('/users/login');
-      } else {
-        toast.error(error.response?.data?.message || 'Failed to delete exchange rate');
       }
+      toast.error(error.message || t('common.error'));
     }
   });
 
-  const handleDeleteClick = (rate: ExchangeRate) => {
+  const handleDelete = (rate: InstitutionExchangeRate) => {
     setDeleteModal({
       isOpen: true,
       rate
@@ -80,9 +88,13 @@ export default function ExchangeRatesTable({ rates, onEdit }: ExchangeRatesTable
     });
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('ID copied to clipboard');
+    toast.success(t('common.success'));
   };
 
   if (!Array.isArray(rates)) {
@@ -93,7 +105,7 @@ export default function ExchangeRatesTable({ rates, onEdit }: ExchangeRatesTable
   return (
     <>
       <Table 
-        aria-label="Exchange rates table"
+        aria-label={t('admin.exchange_rates.title')}
         classNames={{
           wrapper: "shadow-md",
           td: "text-default-700 dark:text-default-300",
@@ -101,28 +113,31 @@ export default function ExchangeRatesTable({ rates, onEdit }: ExchangeRatesTable
         }}
       >
         <TableHeader>
-          <TableColumn>ID</TableColumn>
-          <TableColumn>FROM</TableColumn>
-          <TableColumn>TO</TableColumn>
-          <TableColumn>RATE</TableColumn>
-          <TableColumn>LAST UPDATE</TableColumn>
-          <TableColumn align="center">ACTIONS</TableColumn>
+          <TableColumn>{t('admin.exchange_rates.columns.id')}</TableColumn>
+          <TableColumn>{t('admin.exchange_rates.columns.from')}</TableColumn>
+          <TableColumn>{t('admin.exchange_rates.columns.to')}</TableColumn>
+          <TableColumn>{t('admin.exchange_rates.columns.rate')}</TableColumn>
+          <TableColumn>{t('admin.exchange_rates.columns.institution')}</TableColumn>
+          <TableColumn>{t('admin.exchange_rates.columns.lastUpdate')}</TableColumn>
+          <TableColumn align="center">{t('admin.exchange_rates.columns.actions')}</TableColumn>
         </TableHeader>
-        <TableBody emptyContent="No exchange rates found">
+        <TableBody emptyContent={t('admin.exchange_rates.noRates')}>
           {rates.map((rate) => (
             <TableRow key={rate._id}>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono">{rate._id}</span>
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    variant="light"
-                    onPress={() => copyToClipboard(rate._id)}
-                    className="text-default-400 hover:text-primary-500"
-                  >
-                    <Copy size={14} />
-                  </Button>
+                  <Tooltip content={t('admin.exchange_rates.tooltips.copyId')}>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="light"
+                      onPress={() => copyToClipboard(rate._id)}
+                      className="text-default-400 hover:text-primary-500"
+                    >
+                      <Copy size={14} />
+                    </Button>
+                  </Tooltip>
                 </div>
               </TableCell>
               <TableCell>
@@ -139,13 +154,19 @@ export default function ExchangeRatesTable({ rates, onEdit }: ExchangeRatesTable
                 {Number(rate.exchangeRate).toFixed(4)}
               </TableCell>
               <TableCell>
-                {new Date(rate.updatedAt).toLocaleString()}
+                <Chip size="sm" variant="flat" color="default">
+                  {rate.institution?.name || 'Unknown Institution'}
+                </Chip>
+              </TableCell>
+              <TableCell>
+                {formatDate(rate.updatedAt)}
               </TableCell>
               <TableCell>
                 <div className="flex justify-center gap-2">
-                  <Tooltip content="Edit rate" color="warning">
+                  <Tooltip content={t('admin.exchange_rates.tooltips.edit')} color="warning">
                     <Button
                       isIconOnly
+                      size="sm"
                       variant="light"
                       onPress={() => onEdit(rate)}
                       className="text-warning-500 hover:text-warning-600"
@@ -153,11 +174,12 @@ export default function ExchangeRatesTable({ rates, onEdit }: ExchangeRatesTable
                       <Pencil size={18} />
                     </Button>
                   </Tooltip>
-                  <Tooltip content="Delete rate" color="danger">
+                  <Tooltip content={t('admin.exchange_rates.tooltips.delete')} color="danger">
                     <Button
                       isIconOnly
+                      size="sm"
                       variant="light"
-                      onPress={() => handleDeleteClick(rate)}
+                      onPress={() => handleDelete(rate)}
                       className="text-danger hover:text-danger-600"
                     >
                       <Trash2 size={18} />
@@ -170,57 +192,46 @@ export default function ExchangeRatesTable({ rates, onEdit }: ExchangeRatesTable
         </TableBody>
       </Table>
 
-      <Modal 
-        isOpen={deleteModal.isOpen} 
+      <Modal
+        isOpen={deleteModal.isOpen}
         onClose={handleCloseDeleteModal}
-        size="lg"
-        classNames={{
-          body: "py-6",
-          backdrop: "bg-[#292f46]/50 backdrop-opacity-40",
-          base: "border-[#292f46] bg-white dark:bg-gray-900",
-          header: "border-b border-[#292f46]",
-        }}
+        backdrop="blur"
       >
         <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            <span className="text-danger">Delete Exchange Rate</span>
-          </ModalHeader>
-          <ModalBody>
-            <Card>
-              <CardBody className="gap-4">
-                <div className="flex justify-center">
-                  <div className="p-3 rounded-full bg-danger/10">
-                    <AlertTriangle className="text-danger" size={24} />
-                  </div>
-                </div>
-                <p className="text-center text-default-700 dark:text-gray-300">
-                  Are you sure you want to delete the exchange rate{' '}
-                  <span className="font-semibold">
-                    {deleteModal.rate?.currencyFrom} to {deleteModal.rate?.currencyTo}
-                  </span>
-                  ?
-                </p>
-                <p className="text-center text-small text-default-500">
-                  This action cannot be undone.
-                </p>
-              </CardBody>
-            </Card>
-          </ModalBody>
-          <ModalFooter>
-            <Button 
-              variant="light" 
-              onPress={handleCloseDeleteModal}
-            >
-              Cancel
-            </Button>
-            <Button
-              color="danger"
-              onPress={handleConfirmDelete}
-              isLoading={deleteMutation.isPending}
-            >
-              Delete
-            </Button>
-          </ModalFooter>
+          {() => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                {t('admin.exchange_rates.delete')}
+              </ModalHeader>
+              <ModalBody>
+                <Card>
+                  <CardBody className="py-5 flex flex-col items-center gap-3">
+                    <div className="p-3 rounded-full bg-danger-50 dark:bg-danger-900/20">
+                      <AlertTriangle className="text-danger" size={24} />
+                    </div>
+                    <p className="text-center">
+                      {t('admin.exchange_rates.messages.deleteWarning')}
+                    </p>
+                  </CardBody>
+                </Card>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  variant="light"
+                  onPress={handleCloseDeleteModal}
+                >
+                  {t('common.cancel')}
+                </Button>
+                <Button
+                  color="danger"
+                  onPress={handleConfirmDelete}
+                  isLoading={deleteMutation.isPending}
+                >
+                  {t('common.delete')}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
         </ModalContent>
       </Modal>
     </>

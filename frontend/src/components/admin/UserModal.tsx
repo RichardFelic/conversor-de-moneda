@@ -23,22 +23,23 @@ import type { User } from '@/types/api';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 
-const schema = yup.object({
+const schema = (t: (key: string) => string) => yup.object({
   username: yup.string()
-    .required('Username is required')
-    .min(3, 'Username must be at least 3 characters')
-    .max(20, 'Username must be less than 20 characters'),
+    .required(t('users.validation.username_required'))
+    .min(3, t('users.validation.username_min'))
+    .max(20, t('users.validation.username_max')),
   email: yup.string()
-    .required('Email is required')
-    .email('Must be a valid email'),
+    .required(t('users.validation.email_required'))
+    .email(t('users.validation.email_invalid')),
   name: yup.string()
-    .required('Name is required')
-    .min(3, 'Name must be at least 3 characters')
-    .max(50, 'Name must be less than 50 characters'),
+    .required(t('users.validation.name_required'))
+    .min(3, t('users.validation.name_min'))
+    .max(50, t('users.validation.name_max')),
   role: yup.string()
-    .required('Role is required')
-    .oneOf(['user', 'admin'] as const, 'Invalid role')
+    .required(t('users.validation.role_required'))
+    .oneOf(['user', 'admin'] as const, t('users.validation.role_invalid'))
 }).required();
 
 interface UserModalProps {
@@ -54,11 +55,6 @@ type FormData = {
   role: 'user' | 'admin';
 };
 
-const roles = [
-  { label: 'User', value: 'user' },
-  { label: 'Admin', value: 'admin' }
-] as const;
-
 export default function UserModal({ 
   user, 
   isOpen, 
@@ -67,9 +63,15 @@ export default function UserModal({
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const { t } = useTranslation();
+  
+  const roles = [
+    { label: t('users.roles.user'), value: 'user' },
+    { label: t('users.roles.admin'), value: 'admin' }
+  ] as const;
   
   const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema(t)),
     defaultValues: {
       username: '',
       email: '',
@@ -85,7 +87,7 @@ export default function UserModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      toast.success('User updated successfully');
+      toast.success(t('users.messages.update_success'));
       handleClose();
     },
     onError: (error: any) => {
@@ -93,7 +95,7 @@ export default function UserModal({
         logout();
         navigate('/users/login');
       } else {
-        const errorMessage = error.response?.data?.message || 'Failed to update user';
+        const errorMessage = error.response?.data?.message || t('users.messages.update_error');
         toast.error(errorMessage);
       }
     }
@@ -134,7 +136,7 @@ export default function UserModal({
       <ModalContent>
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalHeader className="flex flex-col gap-1">
-            <span className="text-warning-500">Edit User</span>
+            <span className="text-warning-500">{t('users.edit')}</span>
           </ModalHeader>
           <ModalBody>
             <Card>
@@ -152,7 +154,7 @@ export default function UserModal({
                       variant="flat"
                       color={user.isConfirmed ? 'success' : 'danger'}
                     >
-                      {user.isConfirmed ? 'Email Confirmed' : 'Email Pending'}
+                      {user.isConfirmed ? t('users.status.active') : t('users.status.pending')}
                     </Chip>
                   </div>
                 )}
@@ -163,7 +165,7 @@ export default function UserModal({
                   render={({ field }) => (
                     <Input
                       {...field}
-                      label="Username"
+                      label={t('users.columns.username')}
                       variant="bordered"
                       errorMessage={errors.username?.message}
                       isDisabled={isSubmitting}
@@ -183,7 +185,7 @@ export default function UserModal({
                     <Input
                       {...field}
                       type="email"
-                      label="Email"
+                      label={t('users.columns.email')}
                       variant="bordered"
                       errorMessage={errors.email?.message}
                       isDisabled={isSubmitting}
@@ -202,7 +204,7 @@ export default function UserModal({
                   render={({ field }) => (
                     <Input
                       {...field}
-                      label="Full Name"
+                      label={t('users.columns.name')}
                       variant="bordered"
                       errorMessage={errors.name?.message}
                       isDisabled={isSubmitting}
@@ -220,7 +222,7 @@ export default function UserModal({
                   control={control}
                   render={({ field }) => (
                     <Select
-                      label="Role"
+                      label={t('users.columns.role')}
                       variant="bordered"
                       selectedKeys={[field.value]}
                       onChange={(e) => field.onChange(e.target.value)}
@@ -254,14 +256,14 @@ export default function UserModal({
               isDisabled={isSubmitting}
               className="bg-gray-100 dark:bg-gray-700"
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
               isLoading={isSubmitting}
               className="bg-warning-500 text-white hover:bg-warning-600"
             >
-              Update
+              {t('common.update')}
             </Button>
           </ModalFooter>
         </form>

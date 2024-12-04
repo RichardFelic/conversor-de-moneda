@@ -12,18 +12,20 @@ import ConversionHistoryTable from '@/components/converter/ConversionHistoryTabl
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 
 export default function ConversionHistory() {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const { data: history = [], isLoading, error } = useQuery({
-  queryKey: ['conversion-history'],
-  queryFn: async () => {
-    const response = await conversionApi.getHistory();
-    return response.data;
-  }
+    queryKey: ['conversion-history'],
+    queryFn: async () => {
+      const response = await conversionApi.getHistory();
+      return response.data;
+    }
   });
   
   if (error) {
@@ -32,7 +34,7 @@ export default function ConversionHistory() {
       logout();
       navigate('/users/login');
     }
-    toast.error(error.message || 'Failed to load conversion history');
+    toast.error(error.message || t('common.error'));
   }
 
   const filteredHistory = history.filter(item => {
@@ -59,7 +61,7 @@ export default function ConversionHistory() {
               <History className="text-danger" size={24} />
             </div>
             <p className="text-danger text-lg font-medium">
-              {(error as { response?: { data?: { error?: string } } }).response?.data?.error || 'You need to login to see the conversion history'}
+              {t('auth.loginRequired')}
             </p>
           </CardBody>
         </Card>
@@ -76,7 +78,7 @@ export default function ConversionHistory() {
               <History className="text-primary-500" size={24} />
             </div>
             <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-              Conversion History
+              {t('conversion_history.title')}
             </h1>
           </div>
         </CardBody>
@@ -86,7 +88,7 @@ export default function ConversionHistory() {
         <CardBody>
           <Input
             type="search"
-            placeholder="Search by currency..."
+            placeholder={t('conversion_history.search_placeholder')}
             value={searchTerm}
             onValueChange={setSearchTerm}
             className="w-full sm:w-64"
@@ -106,12 +108,12 @@ export default function ConversionHistory() {
               <History className="text-primary-500" size={32} />
             </div>
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-              No History Found
+              {t('common.noResults')}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
               {searchTerm 
-                ? 'No results match your search criteria.' 
-                : 'There is no conversion history to display.'}
+                ? t('conversion_history.no_results')
+                : t('conversion_history.no_history')}
             </p>
           </CardBody>
         </Card>

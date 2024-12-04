@@ -15,12 +15,14 @@ import ExchangeRateModal from '@/components/admin/exchangeRates/ExchangeRateModa
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminExchangeRates() {
   const [selectedRate, setSelectedRate] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const { data: rates = [], isLoading, error, refetch } = useQuery({
     queryKey: ['admin-exchange-rates'],
@@ -96,10 +98,10 @@ export default function AdminExchangeRates() {
               <DollarSign className="text-primary-500" size={24} />
             </div>
             <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-              Exchange Rates Management
+              {t('admin.exchange_rates.management')}
             </h1>
           </div>
-          <Tooltip content="Add new exchange rate">
+          <Tooltip content={t('admin.exchange_rates.add')}>
             <Button
               color="success"
               startContent={<Plus size={20} />}
@@ -107,7 +109,7 @@ export default function AdminExchangeRates() {
               size="lg"
               className="bg-success-500 hover:bg-success-600 text-white font-medium px-6 h-12"
             >
-              Add Exchange Rate
+              {t('admin.exchange_rates.add')}
             </Button>
           </Tooltip>
         </CardBody>
@@ -138,7 +140,10 @@ export default function AdminExchangeRates() {
         </Card>
       ) : (
         <ExchangeRatesTable 
-          rates={rates || []}
+          rates={rates.map(rate => ({ 
+            ...rate, 
+            institution: { _id: 'no-institution', name: 'No Institution' }
+          }))}
           onEdit={(rate) => handleEdit(rate as unknown as SetStateAction<null>)}
         />
       )}

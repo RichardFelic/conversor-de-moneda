@@ -6,10 +6,10 @@ import {
   TableRow, 
   TableCell,
   Chip,
-  // Link
 } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
 import type { ExchangeRate } from '@/types/api';
+import { useTranslation } from 'react-i18next';
 
 interface ExchangeRatesTableProps {
   rates: ExchangeRate[];
@@ -17,14 +17,26 @@ interface ExchangeRatesTableProps {
 
 export default function ExchangeRatesTable({ rates }: ExchangeRatesTableProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+    try {
+      return new Date(dateString).toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString;
+    }
   };
 
   return (
     <Table 
-      aria-label="Exchange rates table"
+      aria-label={t('exchange_rates.table.aria_label')}
       classNames={{
         wrapper: "shadow-sm",
         th: "bg-default-100 text-default-600",
@@ -32,12 +44,12 @@ export default function ExchangeRatesTable({ rates }: ExchangeRatesTableProps) {
       }}
     >
       <TableHeader>
-        <TableColumn>FROM</TableColumn>
-        <TableColumn>TO</TableColumn>
-        <TableColumn>RATE</TableColumn>
-        <TableColumn>LAST UPDATE</TableColumn>
+        <TableColumn>{t('exchange_rates.table.from')}</TableColumn>
+        <TableColumn>{t('exchange_rates.table.to')}</TableColumn>
+        <TableColumn>{t('exchange_rates.table.rate')}</TableColumn>
+        <TableColumn>{t('exchange_rates.table.last_update')}</TableColumn>
       </TableHeader>
-      <TableBody emptyContent="No exchange rates found">
+      <TableBody emptyContent={t('exchange_rates.table.no_rates')}>
         {rates.map((rate) => (
           <TableRow 
             key={rate._id}
@@ -58,7 +70,7 @@ export default function ExchangeRatesTable({ rates }: ExchangeRatesTableProps) {
               {rate.exchangeRate.toFixed(4)}
             </TableCell>
             <TableCell>
-            {formatDate(rate.updatedAt?.toString() ?? '')}
+              {formatDate(rate.update_date)}
             </TableCell>
           </TableRow>
         ))}

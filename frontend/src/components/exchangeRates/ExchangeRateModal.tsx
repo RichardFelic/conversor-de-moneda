@@ -82,7 +82,12 @@ export default function ExchangeRateModal({
       handleClose();
     },
     onError: (error: unknown) => {
-      toast.error((error as { response?: { data?: { error?: string } } }).response?.data?.error || `Failed to ${rate ? 'update' : 'create'} exchange rate`);
+      const errorResponse = error as { response?: { data?: { error?: string; message?: string } } };
+      const errorMessage = 
+        errorResponse.response?.data?.error || 
+        errorResponse.response?.data?.message || 
+        `Failed to ${rate ? 'update' : 'create'} exchange rate`;
+      toast.error(errorMessage);
     }
   });
 

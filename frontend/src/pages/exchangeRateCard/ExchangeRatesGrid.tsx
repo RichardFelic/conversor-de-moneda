@@ -19,8 +19,8 @@ export function ExchangeRatesGrid({ rates }: ExchangeRatesGridProps) {
 
   
   const filteredRates: ExchangeRate[] = rates.filter(rate => {
-    return (rate.currencyFrom as string)?.includes(searchQuery.toUpperCase()) ||
-           (rate.currencyTo as string)?.includes(searchQuery.toUpperCase());
+    return rate.currencyFrom.includes(searchQuery.toUpperCase()) ||
+           rate.currencyTo.includes(searchQuery.toUpperCase());
   });
 
   const handleRateSelect = (rateId: string) => {
@@ -49,6 +49,19 @@ export function ExchangeRatesGrid({ rates }: ExchangeRatesGridProps) {
             aria-label="Exchange rates"
             className="w-[calc(100vw-175px)]"
             closeOnSelect={true}
+            items={[
+              ...filteredRates.map(rate => ({
+                key: rate._id,
+                label: `${rate.currencyFrom} → ${rate.currencyTo}`,
+                onClick: () => handleRateSelect(rate._id)
+              })),
+              ...(filteredRates.length === 0 ? [{
+                key: 'no-results',
+                label: t('common.noResults'),
+                isReadOnly: true,
+                className: "text-default-500"
+              }] : [])
+            ]}
           >
             <DropdownItem key="search" className="h-12 gap-2" isReadOnly>
               <Input
@@ -63,26 +76,6 @@ export function ExchangeRatesGrid({ rates }: ExchangeRatesGridProps) {
                 size="sm"
               />
             </DropdownItem>
-            {filteredRates.map((rate) => (
-              <DropdownItem 
-                key={rate._id}
-                onClick={() => handleRateSelect(rate._id)}
-              >
-                <div className="flex flex-col py-1 items-center text-center">
-                  <div className="flex justify-between">
-                    <span className="font-medium text-black">
-                      {rate.currencyFrom} → {rate.currencyTo}
-                    </span>
-                  </div>
-                  
-                </div>
-              </DropdownItem>
-            ))}
-            {filteredRates.length === 0 && (
-              <DropdownItem key="no-results" className="text-default-500" isReadOnly>
-                No exchange rates found
-              </DropdownItem>
-            )}
           </DropdownMenu>
         </Dropdown>
       </div>

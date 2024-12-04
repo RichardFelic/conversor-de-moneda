@@ -18,6 +18,7 @@ import {
 } from '@nextui-org/react';
 import { Pencil, Trash2, AlertTriangle } from 'lucide-react';
 import type { Institution } from '@/types/api';
+import { useTranslation } from 'react-i18next';
 
 interface InstitutionsTableProps {
   institutions: Institution[];
@@ -30,6 +31,7 @@ export default function InstitutionsTable({
   onEdit, 
   onDelete 
 }: InstitutionsTableProps) {
+  const { t } = useTranslation();
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     institution: Institution | null;
@@ -65,27 +67,33 @@ export default function InstitutionsTable({
   return (
     <>
       <Table 
-        aria-label="Institutions table"
+        aria-label={t('institutions.title')}
         classNames={{
           td: "text-default-700 dark:text-default-300",
           th: "bg-default-100 dark:bg-default-50 text-default-600 dark:text-default-400"
         }}
       >
         <TableHeader>
-          <TableColumn>LOGO</TableColumn>
-          <TableColumn>NAME</TableColumn>
-          <TableColumn>COUNTRY</TableColumn>
-          <TableColumn align="center">ACTIONS</TableColumn>
+          <TableColumn>{t('institutions.columns.logo')}</TableColumn>
+          <TableColumn>{t('institutions.columns.name')}</TableColumn>
+          <TableColumn>{t('institutions.columns.country')}</TableColumn>
+          <TableColumn align="center">{t('institutions.columns.actions')}</TableColumn>
         </TableHeader>
-        <TableBody emptyContent="No institutions found">
+        <TableBody emptyContent={t('institutions.noInstitutions')}>
           {institutions.map((institution) => (
             <TableRow key={institution._id}>
-              <TableCell><img className="rounded-full max-w-16 max-h-16 object-contain"src={institution.img || '-'}/></TableCell>
+              <TableCell>
+                <img 
+                  className="rounded-full max-w-16 max-h-16 object-contain"
+                  src={institution.img || '-'}
+                  alt={institution.name}
+                />
+              </TableCell>
               <TableCell className="font-medium">{institution.name}</TableCell>
               <TableCell>{institution.country || '-'}</TableCell>
               <TableCell>
                 <div className="flex justify-center gap-2">
-                  <Tooltip content="Edit institution" color="warning">
+                  <Tooltip content={t('institutions.tooltips.edit')} color="warning">
                     <Button
                       isIconOnly
                       variant="light"
@@ -95,7 +103,7 @@ export default function InstitutionsTable({
                       <Pencil size={18} />
                     </Button>
                   </Tooltip>
-                  <Tooltip content="Delete institution" color="danger">
+                  <Tooltip content={t('institutions.tooltips.delete')} color="danger">
                     <Button
                       isIconOnly
                       variant="light"
@@ -125,7 +133,7 @@ export default function InstitutionsTable({
       >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
-            <span className="text-danger">Delete Institution</span>
+            <span className="text-danger">{t('institutions.delete')}</span>
           </ModalHeader>
           <ModalBody>
             <Card>
@@ -136,14 +144,11 @@ export default function InstitutionsTable({
                   </div>
                 </div>
                 <p className="text-center text-default-700 dark:text-gray-300">
-                  Are you sure you want to delete{' '}
-                  <span className="font-semibold">
-                    {deleteModal.institution?.name}
-                  </span>
-                  ?
+                  {t('institutions.deleteConfirm')}
+                  <span className="font-semibold"> {deleteModal.institution?.name}</span>?
                 </p>
                 <p className="text-center text-small text-default-500">
-                  This action cannot be undone.
+                  {t('institutions.messages.deleteWarning')}
                 </p>
               </CardBody>
             </Card>
@@ -153,13 +158,13 @@ export default function InstitutionsTable({
               variant="light" 
               onPress={handleCloseDeleteModal}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               color="danger"
               onPress={handleConfirmDelete}
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </ModalFooter>
         </ModalContent>

@@ -20,12 +20,17 @@ export default function ExchangeRateDetails() {
   const { data: rate, isLoading, error } = useQuery({
     queryKey: ['exchange-rate', id],
     queryFn: async () => {
-      if (!id) throw new Error('Exchange rate ID is required');
+      if (!id) throw new Error(t('errors.exchangeRateIdRequired'));
       try {
         const response = await exchangeRateApi.getById(id);
         return response.data;
       } catch (error: unknown) {
-        toast.error((error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to load exchange rate details');
+        const errorResponse = error as { response?: { data?: { error?: string; message?: string } } };
+        const errorMessage = 
+          errorResponse.response?.data?.error || 
+          errorResponse.response?.data?.message || 
+          t('errors.failedToLoadExchangeRate');
+        toast.error(errorMessage);
         throw error;
       }
     },
@@ -41,6 +46,11 @@ export default function ExchangeRateDetails() {
   }
 
   if (error || !rate) {
+    const errorResponse = error as { response?: { data?: { error?: string; message?: string } } };
+    const errorMessage = 
+      errorResponse?.response?.data?.error || 
+      errorResponse?.response?.data?.message || 
+      t('errors.exchangeRateNotFound');
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <Card>
@@ -49,7 +59,7 @@ export default function ExchangeRateDetails() {
               <DollarSign className="text-danger" size={24} />
             </div>
             <p className="text-danger text-lg font-medium">
-            {(error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Exchange rate not found'}
+              {errorMessage}
             </p>
           </CardBody>
         </Card>
@@ -99,7 +109,7 @@ export default function ExchangeRateDetails() {
               <div>
                 <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('exchange_rate_details.last_updated')}</h2>
                 <p className="text-gray-700 dark:text-gray-300 mt-1">
-                  {formatDate(rate.updatedAt?.toString() ?? '')}
+                  {formatDate(rate.update_date)}
                 </p>
               </div>
             </div>

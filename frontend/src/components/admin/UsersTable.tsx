@@ -24,6 +24,7 @@ import type { User } from '@/types/api';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 
 interface UsersTableProps {
   users: User[];
@@ -31,6 +32,7 @@ interface UsersTableProps {
 }
 
 export default function UsersTable({ users, onEdit }: UsersTableProps) {
+  const { t } = useTranslation();
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     user: User | null;
@@ -44,23 +46,23 @@ export default function UsersTable({ users, onEdit }: UsersTableProps) {
   const { logout } = useAuthStore();
 
   const deleteMutation = useMutation({
-  mutationFn: async (id: string) => {
-    return userApi.delete(id);
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['users'] });
-    toast.success('User deleted successfully');
-    handleCloseDeleteModal();
-  },
-  onError: (error: any) => {
-    if (error.response?.status === 401) {
-      logout();
-      navigate('/users/login');
-    } else {
-      toast.error(error.response?.data?.error || 'Failed to delete user');
+    mutationFn: async (id: string) => {
+      return userApi.delete(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('User deleted successfully');
+      handleCloseDeleteModal();
+    },
+    onError: (error: any) => {
+      if (error.response?.status === 401) {
+        logout();
+        navigate('/users/login');
+      } else {
+        toast.error(error.response?.data?.error || 'Failed to delete user');
+      }
     }
-  }
-});
+  });
 
   const handleDeleteClick = (user: User) => {
     setDeleteModal({
@@ -85,21 +87,21 @@ export default function UsersTable({ users, onEdit }: UsersTableProps) {
   return (
     <>
       <Table 
-        aria-label="Users table"
+        aria-label={t('users.title')}
         classNames={{
           td: "text-default-700 dark:text-default-300",
           th: "bg-default-100 dark:bg-default-50 text-default-600 dark:text-default-400"
         }}
       >
         <TableHeader>
-          <TableColumn>USERNAME</TableColumn>
-          <TableColumn>NAME</TableColumn>
-          <TableColumn>EMAIL</TableColumn>
-          <TableColumn>ROLE</TableColumn>
-          <TableColumn>STATUS</TableColumn>
-          <TableColumn align="center">ACTIONS</TableColumn>
+          <TableColumn>{t('users.columns.username')}</TableColumn>
+          <TableColumn>{t('users.columns.name')}</TableColumn>
+          <TableColumn>{t('users.columns.email')}</TableColumn>
+          <TableColumn>{t('users.columns.role')}</TableColumn>
+          <TableColumn>{t('users.columns.status')}</TableColumn>
+          <TableColumn align="center">{t('users.columns.actions')}</TableColumn>
         </TableHeader>
-        <TableBody emptyContent="No users found">
+        <TableBody emptyContent={t('users.messages.noUsers')}>
           {users.map((user) => (
             <TableRow key={user._id}>
               <TableCell className="font-medium">{user.username}</TableCell>
@@ -120,12 +122,12 @@ export default function UsersTable({ users, onEdit }: UsersTableProps) {
                   variant="flat"
                   color={user.isConfirmed ? 'success' : 'danger'}
                 >
-                  {user.isConfirmed ? 'CONFIRMED' : 'PENDING'}
+                  {user.isConfirmed ? t('users.status.active') : t('users.status.pending')}
                 </Chip>
               </TableCell>
               <TableCell>
                 <div className="flex justify-center gap-2">
-                  <Tooltip content="Edit user" color="warning">
+                  <Tooltip content={t('users.tooltips.edit')} color="warning">
                     <Button
                       isIconOnly
                       variant="light"
@@ -135,7 +137,7 @@ export default function UsersTable({ users, onEdit }: UsersTableProps) {
                       <Pencil size={18} />
                     </Button>
                   </Tooltip>
-                  <Tooltip content="Delete user" color="danger">
+                  <Tooltip content={t('users.tooltips.delete')} color="danger">
                     <Button
                       isIconOnly
                       variant="light"
@@ -165,7 +167,7 @@ export default function UsersTable({ users, onEdit }: UsersTableProps) {
       >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
-            <span className="text-danger">Delete User</span>
+            <span className="text-danger">{t('users.delete')}</span>
           </ModalHeader>
           <ModalBody>
             <Card>
@@ -176,14 +178,11 @@ export default function UsersTable({ users, onEdit }: UsersTableProps) {
                   </div>
                 </div>
                 <p className="text-center text-default-700 dark:text-gray-300">
-                  Are you sure you want to delete user{' '}
-                  <span className="font-semibold">
-                    {deleteModal.user?.username}
-                  </span>
-                  ?
+                  {t('users.deleteConfirm')}
+                  <span className="font-semibold"> {deleteModal.user?.username}</span>
                 </p>
                 <p className="text-center text-small text-default-500">
-                  This action cannot be undone.
+                  {t('common.deleteWarning')}
                 </p>
               </CardBody>
             </Card>
@@ -193,14 +192,14 @@ export default function UsersTable({ users, onEdit }: UsersTableProps) {
               variant="light" 
               onPress={handleCloseDeleteModal}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               color="danger"
               onPress={handleConfirmDelete}
               isLoading={deleteMutation.isPending}
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </ModalFooter>
         </ModalContent>

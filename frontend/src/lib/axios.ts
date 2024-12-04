@@ -2,19 +2,27 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/authStore';
 
 export const api = axios.create({
-  baseURL: `${import.meta.env.VITE_BACKEND_BASE_URL}/api`, // Usa el prefijo `VITE_`
+
+  baseURL: import.meta.env.VITE_API_URL,
+
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 });
 
-api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
-  if (token) {
-    config.headers = { ...config.headers, Authorization: `Bearer ${token}` };
+api.interceptors.request.use(
+  (config) => {
+    const { token } = useAuthStore.getState();
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 api.interceptors.response.use(
   (response) => response,

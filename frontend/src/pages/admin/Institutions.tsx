@@ -16,6 +16,7 @@ import type { Institution } from '@/types/api';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 
 export default function Institutions() {
   const [selectedInstitution, setSelectedInstitution] = useState<Institution | null>(null);
@@ -23,6 +24,7 @@ export default function Institutions() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const { data: institutions = [], isLoading, error } = useQuery({
     queryKey: ['institutions'],
@@ -38,7 +40,7 @@ export default function Institutions() {
       logout();
       navigate('/users/login');
     }
-    toast.error(error.message || 'Failed to load institutions');
+    toast.error(error.message || t('common.error'));
   }
 
   const deleteMutation = useMutation({
@@ -47,18 +49,9 @@ export default function Institutions() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['institutions'] });
-      toast.success('Institution deleted successfully');
+      toast.success(t('common.success'));
     }
   });
-  
-  if (error) {
-    const errorResponse = error as { response?: { status?: number } };
-    if (errorResponse.response?.status === 401) {
-      logout();
-      navigate('/users/login');
-    }
-    toast.error(error.message || 'Failed to load institution');
-  }
 
   const handleEdit = (institution: Institution) => {
     setSelectedInstitution(institution);
@@ -74,7 +67,6 @@ export default function Institutions() {
     deleteMutation.mutate(id);
   };
 
-  // Handle keyboard shortcut
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
@@ -104,13 +96,13 @@ export default function Institutions() {
               <Building2 className="text-danger" size={24} />
             </div>
             <p className="text-danger text-lg font-medium">
-            {(error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to load institutions'}
+              {t('common.error')}
             </p>
             <Button 
               color="success"
               onClick={() => queryClient.invalidateQueries({ queryKey: ['institutions'] })}
             >
-              Try Again
+              {t('common.tryAgain')}
             </Button>
           </CardBody>
         </Card>
@@ -127,10 +119,10 @@ export default function Institutions() {
               <Building2 className="text-primary-500" size={24} />
             </div>
             <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-              Institutions
+              {t('institutions.title')}
             </h1>
           </div>
-          <Tooltip content="Press Ctrl+N to create new (⌘+N on Mac)">
+          <Tooltip content={t('institutions.tooltips.create')}>
             <Button
               color="success"
               startContent={<Plus size={20} />}
@@ -138,7 +130,7 @@ export default function Institutions() {
               size="lg"
               className="bg-success-500 hover:bg-success-600 text-white font-medium px-6 h-12 shadow-lg hover:shadow-xl transition-all duration-200"
             >
-              Create Institution
+              {t('institutions.create')}
             </Button>
           </Tooltip>
         </CardBody>
@@ -151,10 +143,10 @@ export default function Institutions() {
               <Building2 className="text-success-500" size={32} />
             </div>
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-              No Institutions Yet
+              {t('institutions.messages.noInstitutionsYet')}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-              Get started by creating your first institution. Click the button above or press Ctrl+N (⌘+N on Mac).
+              {t('institutions.messages.createFirst')}
             </p>
             <Button
               color="success"
@@ -163,7 +155,7 @@ export default function Institutions() {
               size="lg"
               className="mt-4 bg-success-500 hover:bg-success-600 text-white font-medium px-8"
             >
-              Create First Institution
+              {t('institutions.firstInstitution')}
             </Button>
           </CardBody>
         </Card>

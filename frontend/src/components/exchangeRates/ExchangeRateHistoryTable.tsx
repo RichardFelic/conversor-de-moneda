@@ -10,12 +10,15 @@ import {
 } from '@nextui-org/react';
 import { Building2 } from 'lucide-react';
 import type { ExchangeRateHistory } from '@/services/api/exchangeRateHistory';
+import { useTranslation } from 'react-i18next';
 
 interface ExchangeRateHistoryTableProps {
   history: ExchangeRateHistory[];
 }
 
 export default function ExchangeRateHistoryTable({ history }: ExchangeRateHistoryTableProps) {
+  const { t } = useTranslation();
+  
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -30,12 +33,12 @@ export default function ExchangeRateHistoryTable({ history }: ExchangeRateHistor
       }}
     >
       <TableHeader>
-        <TableColumn>TYPE</TableColumn>
-        <TableColumn>FROM</TableColumn>
-        <TableColumn>TO</TableColumn>
-        <TableColumn>RATE</TableColumn>
-        <TableColumn>INSTITUTION</TableColumn>
-        <TableColumn>DATE</TableColumn>
+        <TableColumn>{t('exchange_rate_details.columns.type')}</TableColumn>
+        <TableColumn>{t('exchange_rate_details.columns.from')}</TableColumn>
+        <TableColumn>{t('exchange_rate_details.columns.to')}</TableColumn>
+        <TableColumn>{t('exchange_rate_details.columns.rate')}</TableColumn>
+        <TableColumn>{t('exchange_rate_details.columns.institution')}</TableColumn>
+        <TableColumn>{t('exchange_rate_details.columns.date')}</TableColumn>
       </TableHeader>
       <TableBody emptyContent="No history found">
         {history.map((item) => (
@@ -46,7 +49,9 @@ export default function ExchangeRateHistoryTable({ history }: ExchangeRateHistor
                 variant="flat"
                 color={item.institution ? "warning" : "success"}
               >
-                {item.institution ? 'Institutional' : 'General'}
+                {item.institution 
+                  ? t('exchange_rate_details.types.institutional')
+                  : t('exchange_rate_details.types.general')}
               </Chip>
             </TableCell>
             <TableCell>

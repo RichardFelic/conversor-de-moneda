@@ -16,6 +16,7 @@ import ExchangeRateHistoryTable from '@/components/exchangeRates/ExchangeRateHis
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 
 type FilterType = 'all' | 'general' | 'institutional';
 interface ApiError extends Error {
@@ -31,6 +32,7 @@ export default function ExchangeRateHistory() {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const { data: history = [], isLoading, error, isError } = useQuery({
     queryKey: ['exchange-rate-history'],
@@ -114,7 +116,7 @@ export default function ExchangeRateHistory() {
             </Tabs>
             <Input
               type="search"
-              placeholder="Search..."
+              placeholder={t('common.search')}
               value={searchTerm}
               onValueChange={setSearchTerm}
               className="w-full sm:w-64"

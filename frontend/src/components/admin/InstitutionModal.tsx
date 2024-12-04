@@ -20,6 +20,7 @@ import type { Institution } from "@/types/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
 
 const schema = yup
   .object({
@@ -45,6 +46,17 @@ type FormData = {
   img: string | null;
 };
 
+// Add type for API error response
+interface ApiErrorResponse {
+  response?: {
+    status?: number;
+    data?: {
+      error?: string;
+    };
+  };
+  message?: string;
+}
+
 export default function InstitutionModal({
   institution,
   isOpen,
@@ -53,6 +65,7 @@ export default function InstitutionModal({
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const {
     control,
@@ -78,20 +91,15 @@ export default function InstitutionModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["institutions"] });
-      toast.success(
-        `Institution ${institution ? "updated" : "created"} successfully`
-      );
+      toast.success(t('common.success'));
       handleClose();
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorResponse) => {
       if (error.response?.status === 401) {
         logout();
         navigate("/users/login");
       } else {
-        toast.error(
-          error.response?.data?.error ||
-            `Failed to ${institution ? "update" : "create"} institution`
-        );
+        toast.error(error.response?.data?.error || t('common.error'));
       }
     },
   });
@@ -139,7 +147,7 @@ export default function InstitutionModal({
             <span
               className={institution ? "text-warning-500" : "text-success-500"}
             >
-              {institution ? "Edit Institution" : "Add New Institution"}
+              {institution ? t('institutions.edit') : t('institutions.create')}
             </span>
           </ModalHeader>
           <ModalBody>
@@ -168,8 +176,8 @@ export default function InstitutionModal({
                     <Input
                       {...field}
                       {...register("img")}
-                      label="Institution Logo"
-                      value={field.value}
+                      label={t('institutions.logo')}
+                      value={field.value || ''}
                       variant="bordered"
                       errorMessage={errors.img?.message}
                       classNames={{
@@ -189,7 +197,7 @@ export default function InstitutionModal({
                     <Input
                       {...field}
                       {...register("name")}
-                      label="Institution Name"
+                      label={t('institutions.name')}
                       value={field.value.toUpperCase()}
                       variant="bordered"
                       errorMessage={errors.name?.message}
@@ -206,26 +214,26 @@ export default function InstitutionModal({
                 />
 
                 <Controller
-                name="country"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                  {...register("country")}
-                  label="Country"
-                  value={field.value.toUpperCase()}
-                  variant="bordered"
-                  errorMessage={errors.country?.message}
-                  isDisabled={isSubmitting}
-                  classNames={{
-                    label:
-                      "text-sm font-medium text-default-700 dark:text-gray-300",
-                    input: "text-sm dark:text-white",
-                    inputWrapper:
-                      "border-surface-300 dark:border-gray-600 hover:border-success-500 focus-within:!border-success-500",
-                  }}
-                />
-                )}
+                  name="country"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      {...register("country")}
+                      label={t('institutions.country')}
+                      value={field.value?.toUpperCase() || ''}
+                      variant="bordered"
+                      errorMessage={errors.country?.message}
+                      isDisabled={isSubmitting}
+                      classNames={{
+                        label:
+                          "text-sm font-medium text-default-700 dark:text-gray-300",
+                        input: "text-sm dark:text-white",
+                        inputWrapper:
+                          "border-surface-300 dark:border-gray-600 hover:border-success-500 focus-within:!border-success-500",
+                      }}
+                    />
+                  )}
                 />
               </CardBody>
             </Card>
@@ -237,7 +245,7 @@ export default function InstitutionModal({
               isDisabled={isSubmitting}
               className="bg-gray-100 dark:bg-gray-700"
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -248,7 +256,7 @@ export default function InstitutionModal({
                   : "bg-success-500 text-white hover:bg-success-600"
               }
             >
-              {institution ? "Update" : "Create"}
+              {institution ? t('common.save') : t('common.create')}
             </Button>
           </ModalFooter>
         </form>

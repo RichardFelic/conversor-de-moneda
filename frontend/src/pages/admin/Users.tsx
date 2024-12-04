@@ -4,7 +4,6 @@ import {
   Spinner,
   Card,
   CardBody,
-  // Tooltip,
   useDisclosure
 } from '@nextui-org/react';
 import { Users as UsersIcon } from 'lucide-react';
@@ -16,12 +15,14 @@ import type { User } from '@/types/api';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 
 export default function Users() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const { data: users = [], isLoading, error } = useQuery({
     queryKey: ['users'],
@@ -62,13 +63,13 @@ export default function Users() {
               <UsersIcon className="text-danger" size={24} />
             </div>
             <p className="text-danger text-lg font-medium">
-              {(error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to load users'}
+              {(error as { response?: { data?: { error?: string } } }).response?.data?.error || t('common.error.load_failed')}
             </p>
             <Button 
               color="primary"
               onClick={() => window.location.reload()}
             >
-              Try Again
+              {t('common.try_again')}
             </Button>
           </CardBody>
         </Card>
@@ -85,7 +86,7 @@ export default function Users() {
               <UsersIcon className="text-primary-500" size={24} />
             </div>
             <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-              Users Management
+              {t('users.title')}
             </h1>
           </div>
         </CardBody>
@@ -98,10 +99,10 @@ export default function Users() {
               <UsersIcon className="text-primary-500" size={32} />
             </div>
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-              No Users Found
+              {t('users.messages.noUsers')}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-              There are currently no users in the system.
+              {t('users.messages.createFirst')}
             </p>
           </CardBody>
         </Card>

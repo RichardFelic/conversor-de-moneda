@@ -28,8 +28,8 @@ export default function ExchangeRates() {
   }
 
   if (error) {
-    const errorResponse = error as { response?: { data?: { error?: string } } };
-    toast.error(errorResponse.response?.data?.error || 'Failed to load exchange rates');
+    const errorMessage = (error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to load exchange rates';
+    toast.error(errorMessage);
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <Card>
@@ -38,24 +38,7 @@ export default function ExchangeRates() {
               <DollarSign className="text-danger" size={24} />
             </div>
             <p className="text-danger text-lg font-medium">
-              {(error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to load exchange rates'}
-            </p>
-          </CardBody>
-        </Card>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-96 gap-4">
-        <Card>
-          <CardBody className="py-8 px-12 flex flex-col items-center gap-4">
-            <div className="p-3 rounded-full bg-danger/10">
-              <DollarSign className="text-danger" size={24} />
-            </div>
-            <p className="text-danger text-lg font-medium">
-              {(error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to load exchange rates'}
+              {errorMessage}
             </p>
           </CardBody>
         </Card>
